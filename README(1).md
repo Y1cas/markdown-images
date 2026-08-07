@@ -46,7 +46,7 @@ sudo ldconfig
 ## 二、 Windows 主机环境配置
 
 ### 1. 前置软件准备
-- **Visual Studio 2022 / 2019**：勾选 **“使用 C++ 的桌面开发”** 以及 **“使用 C++ 的 Linux 开发”** 工作负载。
+- **Visual Studio 2026 ：勾选 **“使用 C++ 的桌面开发”** 以及 **“使用 C++ 的 Linux 开发”** 工作负载。
 - **CMake**：确保已安装并添加至系统环境变量 `PATH`。
 - **Git for Windows**：用于拉取源码。
 
@@ -62,7 +62,7 @@ cd cyclonedds
 mkdir build && cd build
 
 :: 生成 Visual Studio 工程并编译安装
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX="C:/cyclonedds" ..
+cmake -G "Visual Studio 18 2026" -A x64 -DCMAKE_INSTALL_PREFIX="C:/cyclonedds" ..
 cmake --build . --config Release --target install
 ```
 
