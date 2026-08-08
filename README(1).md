@@ -26,10 +26,11 @@ sudo apt install -y build-essential cmake git libssl-dev
 ### 2. 编译与安装 CycloneDDS
 从 GitHub 拉取官方源码并进行编译：
 
+```bash
 $ git clone https://github.com/eclipse-cyclonedds/cyclonedds.git
 $ cd cyclonedds
 $ mkdir build
-
+```
 ## 二、 Windows 主机环境配置
 
 ### 1. 前置软件准备
