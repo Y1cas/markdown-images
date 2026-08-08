@@ -48,7 +48,7 @@ cmake --build . --config Release
 ```
 
 ### 3. 配置系统环境变量
-1. 将 `C:\cycloneddsin` 添加至系统的 **Path** 环境变量中。
+1. 将 `C:\cyclonedds\bin` 添加至系统的 **Path** 环境变量中。
 2. 新增环境变量 `CycloneDDS_DIR`，值为 `C:/cyclonedds/lib/cmake/CycloneDDS`。
 
 ---
