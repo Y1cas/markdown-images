@@ -134,7 +134,7 @@ cd cyclonedds/build/bin
 $ mkdir roundtrip
 $ cd roundtrip
 $ cmake <install-location>/share/CycloneDDS/examples/roundtrip
-$ cmake --build .
+$ cmake --build . --config Release
 ```
 ---
 
