@@ -1,90 +1,3 @@
-
-# What is DDS?
-
-DDS is the best-kept secret in distributed systems, one that has been around for much longer than most publish-subscribe messaging systems and still outclasses so many of them.
-DDS is used in a wide variety of systems, including air-traffic control, jet engine testing, railway control, medical systems, naval command-and-control, smart greenhouses and much more.
-In short, it is well-established in aerospace and defense but no longer limited to that.
-And yet it is easy to use!
-
-Types are usually defined in IDL and preprocessed with the IDL compiler included in Cyclone, but our [Python binding](https://github.com/eclipse-cyclonedds/cyclonedds-python) allows you to define data types on the fly:
-```Python
-from dataclasses import dataclass
-from cyclonedds.domain import DomainParticipant
-from cyclonedds.core import Qos, Policy
-from cyclonedds.pub import DataWriter
-from cyclonedds.sub import DataReader
-from cyclonedds.topic import Topic
-from cyclonedds.idl import IdlStruct
-from cyclonedds.idl.annotations import key
-from time import sleep
-import numpy as np
-try:
-    from names import get_full_name
-    name = get_full_name()
-except:
-    import os
-    name = f"{os.getpid()}"
-
-# C, C++ require using IDL, Python doesn't
-@dataclass
-class Chatter(IdlStruct, typename="Chatter"):
-    name: str
-    key("name")
-    message: str
-    count: int
-
-rng = np.random.default_rng()
-dp = DomainParticipant()
-tp = Topic(dp, "Hello", Chatter, qos=Qos(Policy.Reliability.Reliable(0)))
-dw = DataWriter(dp, tp)
-dr = DataReader(dp, tp)
-count = 0
-while True:
-    sample = Chatter(name=name, message="Hello, World!", count=count)
-    count = count + 1
-    print("Writing ", sample)
-    dw.write(sample)
-    for sample in dr.take(10):
-        print("Read ", sample)
-    sleep(rng.exponential())
-```
-
-Today DDS is also popular in robotics and autonomous vehicles because those really depend on high-throughput, low-latency control systems without introducing a single point of failure by having a message broker in the middle.
-Indeed, it is by far the most used and the default middleware choice in ROS 2.
-It is used to transfer commands, sensor data and even video and point clouds between components.
-
-The OMG DDS specifications cover everything one needs to build systems using publish-subscribe messaging.
-They define a structural type system that allows automatic endianness conversion and type checking between readers and writers.
-This type system also supports type evolution.
-The interoperable networking protocol and standard C++ API make it easy to build systems that integrate multiple DDS implementations.
-Zero-configuration discovery is also included in the standard and supported by all implementations.
-
-DDS actually brings more: publish-subscribe messaging is a nice abstraction over "ordinary" networking, but plain publish-subscribe doesn't affect how one *thinks* about systems.
-A very powerful architecture that truly changes the perspective on distributed systems is that of the "shared data space", in itself an old idea, and really just a distributed database.
-Most shared data space designs have failed miserably in real-time control systems because they provided strong consistency guarantees and sacrificed too much performance and flexibility.
-The *eventually consistent* shared data space of DDS has been very successful in helping with building systems that need to satisfy many "ilities": dependability, maintainability, extensibility, upgradeability, ...
-Truth be told, that's why it was invented, and publish-subscribe messaging was simply an implementation technique.
-
-Cyclone DDS aims at full coverage of the specs and today already covers most of this.
-With references to the individual OMG specifications, the following is available:
-
-- [DCPS](https://www.omg.org/spec/DDS/1.4/PDF) the base specification
-  - zero configuration discovery (if multicast works)
-  - publish/subscribe messaging
-  - configurable storage of data in subscribers
-  - many QoS settings - liveliness monitoring, deadlines, historical data, ...
-  - coverage includes the Minimum, Ownership and (partially) Content profiles
-- [DDS Security](https://www.omg.org/spec/DDS-SECURITY/1.1/PDF) - providing authentication, access control and encryption
-- [DDS C++ API](https://www.omg.org/spec/DDS-PSM-Cxx/1.0/PDF)
-- [DDS XTypes](https://www.omg.org/spec/DDS-XTypes/1.3/PDF) - the structural type system (some [caveats](docs/dev/xtypes_relnotes.md) here)
-- [DDSI-RTPS](https://www.omg.org/spec/DDSI-RTPS/2.5/PDF) - the interoperable network protocol
-
-The network stack in Cyclone DDS has been around for over a decade in one form or another and has proven itself in many systems, including large, high-availability ones and systems where interoperatibility with other implementations was needed.
-
-This repository provides the core of Cyclone DDS including its C API, the [OMG C++](https://github.com/eclipse-cyclonedds/cyclonedds-cxx) and the [Python](https://github.com/eclipse-cyclonedds/cyclonedds-python) language bindings are in sibling repositories.
-
-Consult the [roadmap](ROADMAP.md) for a high-level overview of upcoming features.
-
 # Getting Started
 
 ## Building Eclipse Cyclone DDS
@@ -101,7 +14,8 @@ In order to build Cyclone DDS you need a Linux, Mac or Windows 10 machine (or, w
 If you want to play around with the parser you will need to install the bison parser generator. On Ubuntu `apt install bison` should do the trick for getting it installed.
 On Windows, installing chocolatey and `choco install winflexbison3` should get you a long way.  On macOS, `brew install bison` is easiest.
 
-To obtain Eclipse Cyclone DDS, do
+To obtain Eclipse Cyclone DDS, d
+通过在终端输入指令克隆CycloneDDS库
 
     $ git clone https://github.com/eclipse-cyclonedds/cyclonedds.git
     $ cd cyclonedds
@@ -109,40 +23,39 @@ To obtain Eclipse Cyclone DDS, do
 
 Depending on whether you want to develop applications using Cyclone DDS or contribute to it you can follow different procedures:
 
-### Build configuration
+### Build 配置
 
-There are some configuration options specified using CMake defines in addition to the standard options like `CMAKE_BUILD_TYPE`:
+这里除了像 CMAKE_BUILD_TYPE 这样的标准选项外，还有一些使用 CMake 预定义变量（defines）指定的配置选项：
 
-* `-DBUILD_EXAMPLES=ON`: to build the included examples
-* `-DBUILD_TESTING=ON`: to build the test suite (forces exporting all symbols from the library)
-* `-DBUILD_IDLC=NO`: to disable building the IDL compiler (affects building examples, tests and `ddsperf`)
-* `-DBUILD_DDSPERF=NO`: to disable building the [`ddsperf`](https://github.com/eclipse-cyclonedds/cyclonedds/tree/master/src/tools/ddsperf) tool for performance measurement
-* `-DENABLE_SSL=NO`: to not look for OpenSSL, remove TLS/TCP support and avoid building the plugins that implement authentication and encryption (default is `AUTO` to enable them if OpenSSL is found)
-* `-DENABLE_ICEORYX=NO`: do not look for Iceoryx disable building the PSMX Iceoryx plugin (default is `AUTO` to enable it if Iceoryx is found)
-* `-DENABLE_SECURITY=NO`: to not build the security interfaces and hooks in the core code, nor the plugins (one can enable security without OpenSSL present, you'll just have to find plugins elsewhere in that case)
-* `-DENABLE_LIFESPAN=NO`: to exclude support for finite lifespans QoS
-* `-DENABLE_DEADLINE_MISSED=NO`: to exclude support for finite deadline QoS settings
-* `-DENABLE_TYPELIB=NO`: to exclude support for type library, requires also disabling type and topic discovery using `-DENABLE_TYPE_DISCOVERY=NO` and `-DENABLE_TOPIC_DISCOVERY=NO`
-* `-DENABLE_TYPE_DISCOVERY=NO`: to exclude support for type discovery and checking type compatibility (effectively most of XTypes), requires also disabling topic discovery using `-DENABLE_TOPIC_DISCOVERY=NO`
-* `-DENABLE_TOPIC_DISCOVERY=NO`: to exclude support for topic discovery
-* `-DENABLE_SOURCE_SPECIFIC_MULTICAST=NO`: to disable support for source-specific multicast (disabling this and `-DENABLE_IPV6=NO` may be needed for QNX builds)
-* `-DENABLE_IPV6=NO`: to disable ipv6 support (disabling this and `-DENABLE_SOURCE_SPECIFIC_MULTICAST=NO` may be needed for QNX builds)
-* `-DBUILD_IDLC_XTESTS=NO`: Include a set of tests for the IDL compiler that use the C back-end to compile an idl file at (test) runtime, and use the C compiler to build a test application for the generated types, that is executed to do the actual testing (not supported on Windows)
-* `-DENABLE_QOS_PROVIDER=NO`: to disable support for qos provider
-
-### For application developers
+* `-DBUILD_EXAMPLES=ON`: 和样例一起build
+* `-DBUILD_TESTING=ON`: build测试套件（会强制导出库中的所有符号） 
+* `-DBUILD_IDLC=NO`: 禁用构建 IDL 编译器（会影响示例、测试以及 'ddsperf' 的构建）
+* `-DBUILD_DDSPERF=NO`: 禁用构建用于性能测试的 'ddsperf' 工具
+* `-DENABLE_SSL=NO`: 不查找 OpenSSL，移除 TLS/TCP 支持，并避免构建实现身份验证与加密的插件（默认为 AUTO，即检测到 OpenSSL 时自动启用）
+* `-DENABLE_ICEORYX=NO`: 不查找 Iceoryx，禁用构建 PSMX Iceoryx 插件（默认为 AUTO，即检测到 Iceoryx 时自动启用）
+* `-DENABLE_SECURITY=NO`: 不在核心代码中构建安全接口和钩子，也不构建相关插件（可以在没有 OpenSSL 的情况下启用安全特性，但此时需要从其他地方获取插件）
+* `-DENABLE_LIFESPAN=NO`: 排除对有限生存期（finite lifespans）QoS 的支持
+* `-DENABLE_DEADLINE_MISSED=NO`: 排除对有限截止时间（finite deadline）QoS 设置的支持
+* `-DENABLE_TYPELIB=NO`: 排除对类型库（Type Library）的支持，此项同时需要配合设置'-DENABLE_TYPE_DISCOVERY=NO'和'-DENABLE_TOPIC_DISCOVERY=NO'来禁用类型发现与主题发现
+* `-DENABLE_TYPE_DISCOVERY=NO`: 排除对类型发现和类型兼容性检查（即 XTypes 的绝大部分功能）的支持，此项同时需要配合设置 '-DENABLE_TOPIC_DISCOVERY=NO' 来禁用主题发现
+* `-DENABLE_TOPIC_DISCOVERY=NO`: 排除对主题发现（Topic Discovery）的支持
+* `-DENABLE_SOURCE_SPECIFIC_MULTICAST=NO`: 禁用对特定源组播（SSM）的支持（在 QNX 系统上构建时可能需要同时禁用此项与 -DENABLE_IPV6=NO）
+* `-DENABLE_IPV6=NO`: 禁用 IPv6 支持（在 QNX 系统上构建时可能需要同时禁用此项与 -DENABLE_SOURCE_SPECIFIC_MULTICAST=NO）
+* `-DBUILD_IDLC_XTESTS=NO`: 包含针对 IDL 编译器的测试集。该测试会在（测试）运行时使用 C 后端编译 idl 文件，并调用 C 编译器为生成的类型构建测试应用，再通过执行该应用来完成实际测试（不支持 Windows 系统）
+* `-DENABLE_QOS_PROVIDER=NO`: 禁用对 QoS 提供程序（QoS Provider）的支持
+### 对于软件开发者
 
 To build and install the required libraries needed to develop your own applications using Cyclone
 DDS requires a few simple steps.
 There are some small differences between Linux and macOS on the one
 hand, and Windows on the other.
-For Linux or macOS:
+对于linux 或 MacOS
 
     $ cd build
     $ cmake -DCMAKE_INSTALL_PREFIX=<install-location> ..
     $ cmake --build .
 
-and for Windows:
+对于windows
 
     $ cd build
     $ cmake -G "<generator-name>" -DCMAKE_INSTALL_PREFIX=<install-location> ..
