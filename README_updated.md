@@ -130,12 +130,12 @@ cd cyclonedds/build/bin
 
 #### 步骤 B：在 Windows 主机上启动 Ping (发送测试端)
 在 Windows 命令行打开对应的编译输出目录，运行 `RoundtripPing`（后接三个参数：数据包大小 `payloadSize`、样本数 `numSamples`、超时时间 `timeOut`，传 `0 0 0` 即使用默认参数）：
-
+```cmd
 $ mkdir roundtrip
 $ cd roundtrip
 $ cmake <install-location>/share/CycloneDDS/examples/roundtrip
 $ cmake --build .
-
+```
 ---
 
 ### 3. 数据分析与延迟评估
