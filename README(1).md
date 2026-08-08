@@ -12,18 +12,7 @@
 - [五、 常见问题与排查](#五-常见问题与排查)
 
 ---
-
-## 一、 Linux 开发板环境配置
-
-### 1. 基础依赖安装
-登录开发板终端，更新软件源并安装必要的构建工具及依赖库：
-
-```bash
-sudo apt update
-sudo apt install -y build-essential cmake git libssl-dev
-```
-
-### 2. 编译与安装 CycloneDDS
+### 一、 在本地部署git项目
 从 GitHub 拉取官方源码并进行编译：
 
 ```bash
@@ -31,6 +20,7 @@ $ git clone https://github.com/eclipse-cyclonedds/cyclonedds.git
 $ cd cyclonedds
 $ mkdir build
 ```
+
 ## 二、 Windows 主机环境配置
 
 ### 1. 前置软件准备
@@ -39,20 +29,14 @@ $ mkdir build
 - **Git for Windows**：用于拉取源码。
 
 ### 2. 编译与安装 CycloneDDS
-打开 Windows **Developer Command Prompt for VS** (开发人员命令提示符)：
+打开 Windows 终端
 
 ```cmd
 :: 克隆源码
 git clone https://github.com/eclipse-cyclonedds/cyclonedds.git
 cd cyclonedds
+mkdir build 
 
-:: 创建构建目录
-mkdir build && cd build
-
-:: 生成 Visual Studio 工程并编译安装
-cmake -G "Visual Studio 18 2026" -A x64 -DCMAKE_INSTALL_PREFIX="C:/cyclonedds" ..
-cmake --build . --config Release --target install
-```
 
 ### 3. 配置系统环境变量
 1. 将 `C:\cyclonedds\bin` 添加至系统的 **Path** 环境变量中。
