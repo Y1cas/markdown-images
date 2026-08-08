@@ -36,7 +36,7 @@ $ mkdir build
 git clone https://github.com/eclipse-cyclonedds/cyclonedds.git
 cd cyclonedds
 mkdir build 
-
+```
 
 ### 3. 配置系统环境变量
 1. 将 `C:\cyclonedds\bin` 添加至系统的 **Path** 环境变量中。
