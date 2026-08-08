@@ -54,7 +54,7 @@ mkdir build
 3. 点击 **添加 (Add)**：
    - **主机名 (Host Name)**：输入开发板 IP 地址（例如 `192.168.1.10` 或共享网段 IP）。
    - **端口 (Port)**：`22`
-   - **用户名 (User Name)**：开发板用户名（如 `root` 或 `linaro`）。
+   - **用户名 (User Name)**：开发板用户名
    - **身份验证类型 (Authentication type)**：选择密码或 SSH 密钥。
 4. 点击 **连接 (Connect)** 完成连接认证。
 
